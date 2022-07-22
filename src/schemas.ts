@@ -32,10 +32,11 @@ export const CONFIG_SCHEMA1 = {
   },
 };
 
-//schema -> parameter, namespace
-// namespace -> parameter, subnamespace
-// subnamespace-> parameter, subnamespace
-
+//initialValue
+//form.setFieldsValue
+//options varsa veya type boolean ise select ekle
+// resolution varsa incrementli bir input ekle
+//kalan durumlar düz input
 export const CONFIG_SCHEMA2 = {
   parameter10: {
     type: "string", //a value from the given options

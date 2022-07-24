@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import classes from "./ConfigForm.module.css";
 import { Select, Form, Input, Button } from "antd";
 import { CONFIG_SCHEMA1, CONFIG_SCHEMA2 } from "../../schemas";
+
 const { Option } = Select;
 
 const ConfigForm = (props: any) => {
@@ -11,9 +12,16 @@ const ConfigForm = (props: any) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    setConfigSchema(schema);
-    form.resetFields();
-  }, [props.operation]);
+    if (props.operation === 'create') {
+      setConfigSchema(schema);
+
+      form.resetFields();
+      //TODO: put initial values 
+    } else {
+      setConfigSchema(props.userFormData.schema);
+      initializeForm();
+    }
+  }, [props.operation, props.userFormData]);
 
   const setConfigSchema = (schema: string) => {
     console.log("setting,", schema);
@@ -24,8 +32,17 @@ const ConfigForm = (props: any) => {
     } else {
       setFormLayout(parseDefaultConfig(CONFIG_SCHEMA2));
     }
-    console.log(formLayout);
   };
+
+  const initializeForm = () => {
+    Object.keys(props.userFormData).forEach((formData: any) => {
+      if ((formData.includes('parameter') || formData.includes('configName'))&& props.userFormData[formData]) {
+        let setParam: any = {};
+        setParam[formData] = props.userFormData[formData];
+        form.setFieldsValue(setParam);
+      };
+    });
+  }
 
   const parseDefaultConfig = function (obj: any) {
     var keys = Object.keys(obj);
@@ -35,7 +52,7 @@ const ConfigForm = (props: any) => {
         if (key.includes("parameter")) {
           return (
             <li key={Math.random()}>
-              <Form.Item name={["config", key]} label={key}>
+              <Form.Item name={key} label={key}>
                 <Input />
               </Form.Item>
             </li>
@@ -58,8 +75,9 @@ const ConfigForm = (props: any) => {
 
   const saveConfig = (values: any) => {
     console.log(values);
-    values.config.schema = schema;
+    values.schema = schema;
     props.onFormSaved(values);
+    form.resetFields();
   };
 
   return (
@@ -71,7 +89,7 @@ const ConfigForm = (props: any) => {
         {props.operation === "create" && (
           <Select
             className={classes.typeSelect}
-            defaultValue="schema1"
+            defaultValue={schema}
             style={{ width: 120 }}
             onChange={setConfigSchema}
           >
@@ -91,7 +109,7 @@ const ConfigForm = (props: any) => {
           <Form.Item
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 17 }}
-            name={["config", "configName"]}
+            name={ "configName"}
             label="Configuration Name"
           >
             <Input />

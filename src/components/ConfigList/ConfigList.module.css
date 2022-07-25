@@ -1,5 +1,5 @@
 .listWrapper{
-    width: 250px;
+    min-width: 250px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -11,9 +11,22 @@
 
 .configuration:hover{
     background-color: rgb(230, 230, 230);
+
+    
 }
+
+
 
 .configuration{
     cursor: pointer;
     transition:background 0.3s linear;
+    position: relative;
+    word-break: break-all;
+}
+
+.deleteIcon{
+    position: absolute;
+    right: 8px;
+    top: 20px;
+
 }

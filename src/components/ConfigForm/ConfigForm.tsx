@@ -12,15 +12,10 @@ const ConfigForm = (props: any) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (props.operation === 'create') {
-      setConfigSchema(schema);
+    let formSchema = props.operation === 'create' ? schema : props.userFormData.schema;
 
-      form.resetFields();
-      //TODO: put initial values 
-    } else {
-      setConfigSchema(props.userFormData.schema);
-      initializeForm();
-    }
+    setConfigSchema(formSchema);
+    initializeForm(formSchema);
   }, [props.operation, props.userFormData]);
 
   const setConfigSchema = (schema: string) => {
@@ -28,24 +23,53 @@ const ConfigForm = (props: any) => {
     form.resetFields();
     setSchema(schema);
     if (schema === "schema1") {
-      setFormLayout(parseDefaultConfig(CONFIG_SCHEMA1));
+      setFormLayout(generateForm(CONFIG_SCHEMA1));
     } else {
-      setFormLayout(parseDefaultConfig(CONFIG_SCHEMA2));
+      setFormLayout(generateForm(CONFIG_SCHEMA2));
     }
+    initializeForm(schema);
   };
 
-  const initializeForm = () => {
-    Object.keys(props.userFormData).forEach((formData: any) => {
-      if ((formData.includes('parameter') || formData.includes('configName'))&& props.userFormData[formData]) {
+  const initializeForm = (schema: any) => {
+    let formData = getInitialFormData(schema);
+    Object.keys(formData).forEach((key: any) => {
+      if ((key.includes('parameter') || key.includes('configName')) && formData[key]) {
         let setParam: any = {};
-        setParam[formData] = props.userFormData[formData];
+        if (props.operation === 'create') {
+          setParam[key] = formData[key].default ?? null;
+        } else {
+          setParam[key] = formData[key];
+        }
+
         form.setFieldsValue(setParam);
       };
     });
-  }
+  };
 
-  const parseDefaultConfig = function (obj: any) {
-    var keys = Object.keys(obj);
+  const getInitialFormData = (schema: any) => props.operation === 'create' ?
+    (schema === "schema1" ? flattenObject(CONFIG_SCHEMA1) : flattenObject(CONFIG_SCHEMA2)) : props.userFormData;
+
+
+  const flattenObject = (obj: any, roots = []): any => {
+    return Object
+      // find props of given object
+      .keys(obj)
+      // return an object by iterating props
+      .reduce((memo, prop: any) => Object.assign(
+        // create a new object
+        {},
+        // include previously returned object
+        memo,
+        Object.prototype.toString.call(obj[prop]) === '[object Object]' && !prop.includes('parameter')
+          // keep working if value is an object
+          ? flattenObject(obj[prop], roots.concat([prop as never]))
+          // include current prop and value and prefix prop with the roots
+          : { [prop]: obj[prop] }
+      ), {})
+  };
+
+  const generateForm = (obj: any) => {
+    let keys = Object.keys(obj);
 
     return keys.map((key) => {
       if (isObject(obj[key])) {
@@ -61,7 +85,7 @@ const ConfigForm = (props: any) => {
         return (
           <ul key={Math.random()}>
             <li key={Math.random()}>{key}</li>
-            {parseDefaultConfig(obj[key])}
+            {generateForm(obj[key])}
           </ul>
         );
       }
@@ -74,10 +98,13 @@ const ConfigForm = (props: any) => {
   };
 
   const saveConfig = (values: any) => {
-    console.log(values);
     values.schema = schema;
+
+    if (props.operation === 'edit') {
+      values.configId = props.userFormData.configId;
+    }
+
     props.onFormSaved(values);
-    form.resetFields();
   };
 
   return (
@@ -109,7 +136,7 @@ const ConfigForm = (props: any) => {
           <Form.Item
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 17 }}
-            name={ "configName"}
+            name={"configName"}
             label="Configuration Name"
           >
             <Input />

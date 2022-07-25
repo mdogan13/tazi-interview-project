@@ -3,7 +3,6 @@ import classes from "./App.module.css";
 import ConfigList from "./components/ConfigList/ConfigList";
 import { Button } from "antd";
 import ConfigForm from "./components/ConfigForm/ConfigForm";
-import { uuid } from 'uuidv4';
 
 const App = () => {
   const [operation, setOperation] = useState("");
@@ -15,13 +14,18 @@ const App = () => {
   } as any);
 
   const saveForm = (values: any) => {
+    //let hasConfigLimitReached = hasConfigLimitReached();
     if (operation === 'create') {
       createNewConfig(values)
     } else {
       editConfig(values)
     }
+    setIsConfigFormVisible(false);
+  };
 
-  }
+//const hasConfigLimitReached = ():boolean => {
+//  return false;
+//}
 
   const createNewConfig = (values: any) => {
     setUserConfigData((previousData: any) => {
@@ -34,26 +38,32 @@ const App = () => {
     });
   };
 
-  const editConfig = (values:any) => {
-    console.log('edit')
-    //TODO: grab config id here, set schema
+  const editConfig = (values: any) => {
     setOperation('edit');
 
+    setUserConfigData((previousData: any) => {
+      let newState = { ...previousData };
+      let schema = values.schema;
+      let configIndex = userConfigData[schema].findIndex((configData: any) => configData.id !== values.configId);
+      let newConfigArray = userConfigData[schema];
 
-  setUserConfigData((previousData: any) => {
-    let newState = { ...previousData };
-    let schema = values.schema;
-    let configIndex = userConfigData[schema].findIndex((configData:any)=>configData.id!==values.configId);
-    let newConfigArray = userConfigData[schema];
+      newConfigArray[configIndex] = values;
+      newState[schema] = newConfigArray;
 
-    newConfigArray[configIndex]=values;
- 
-    newState[schema] = newConfigArray;
+      return newState;
+    });
+  };
 
-    return newState;
-  });
-  
-  }
+  const deleteConfig = (configId: string, schema: any) => {
+    setUserConfigData((previousData: any) => {
+      let newState = { ...previousData };
+      let newConfigArray = userConfigData[schema].filter((config:any) => config.configId !== configId);
+
+      newState[schema] = newConfigArray;
+
+      return newState;
+    });
+   };
 
   const getUserConfigById = (id: string) => {
     let userConfig = {};
@@ -66,9 +76,7 @@ const App = () => {
     });
 
     return userConfig;
-  }
-
-  const deleteConfig = () => { };
+  };
 
   const openConfigForm = (operation: string, configId?: string) => {
     setIsConfigFormVisible(true);
@@ -79,10 +87,9 @@ const App = () => {
     }
   };
 
-
   return (
     <div className="App">
-      <ConfigList configData={userConfigData} onConfigSelected={openConfigForm} />
+      <ConfigList configData={userConfigData} onConfigSelected={openConfigForm} onConfigDeleted={deleteConfig} />
       {isConfigFormVisible && (
         <ConfigForm operation={operation} onFormSaved={saveForm} userFormData={userFormData}></ConfigForm>
       )}

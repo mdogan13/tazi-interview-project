@@ -7,31 +7,33 @@ import ConfigForm from "./components/ConfigForm/ConfigForm";
 const App = () => {
   const [operation, setOperation] = useState("");
   const [isConfigFormVisible, setIsConfigFormVisible] = useState(false);
-  const [userFormData, setUserFormData] = useState({});
+  const [userFormData, setUserFormData] = useState({} as any);
   const [userConfigData, setUserConfigData] = useState({
     schema1: [] as any,
     schema2: [] as any,
   } as any);
 
   const saveForm = (values: any) => {
-    //let hasConfigLimitReached = hasConfigLimitReached();
+    let hasConfigLimitReached = isConfigLimitReached(values.schema);
+
     if (operation === 'create') {
-      createNewConfig(values)
+      !hasConfigLimitReached && createNewConfig(values)
     } else {
       editConfig(values)
     }
+
     setIsConfigFormVisible(false);
   };
 
-//const hasConfigLimitReached = ():boolean => {
-//  return false;
-//}
+  const isConfigLimitReached = (schema: string): boolean => {
+    return userConfigData[schema].length === 5;
+  }
 
   const createNewConfig = (values: any) => {
     setUserConfigData((previousData: any) => {
       let newState = { ...previousData };
       let schema = values.schema;
-      values['configId'] = values.configName + Math.random();
+      values['configId'] = (values.configName || '') + '_' + Math.random() * (new Date()).getTime();
       newState[schema] = [...userConfigData[schema as keyof typeof userConfigData], values];
 
       return newState;
@@ -44,8 +46,8 @@ const App = () => {
     setUserConfigData((previousData: any) => {
       let newState = { ...previousData };
       let schema = values.schema;
-      let configIndex = userConfigData[schema].findIndex((configData: any) => configData.id !== values.configId);
       let newConfigArray = userConfigData[schema];
+      let configIndex = newConfigArray.findIndex((configData: any) => configData.configId === values.configId);
 
       newConfigArray[configIndex] = values;
       newState[schema] = newConfigArray;
@@ -57,13 +59,17 @@ const App = () => {
   const deleteConfig = (configId: string, schema: any) => {
     setUserConfigData((previousData: any) => {
       let newState = { ...previousData };
-      let newConfigArray = userConfigData[schema].filter((config:any) => config.configId !== configId);
+      let newConfigArray = userConfigData[schema].filter((config: any) => config.configId !== configId);
 
       newState[schema] = newConfigArray;
 
       return newState;
     });
-   };
+
+    if (configId === userFormData.configId) {
+      setIsConfigFormVisible(false)
+    }
+  };
 
   const getUserConfigById = (id: string) => {
     let userConfig = {};

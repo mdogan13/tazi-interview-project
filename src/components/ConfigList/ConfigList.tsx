@@ -9,6 +9,7 @@ const ConfigList = (props: any) => {
   };
 
   const deleteConfig = (id: string, schema: any, event: any) => {
+    //TODO: get id and schema from item
     event.stopPropagation();
     props.onConfigDeleted(id, schema);
   };
@@ -16,7 +17,7 @@ const ConfigList = (props: any) => {
   const renderListItem = (item: any) => (
     <List.Item className={classes.configuration} onClick={() => selectConfig(item.configId)}>
       {item.configName}
-      <DeleteOutlined onClick={(event) => deleteConfig(item.configId, item.schema, event)} className={classes.deleteIcon} />
+      <DeleteOutlined onClick={(event) => deleteConfig(item.configId, item.schema, event)} className={classes.deleteIcon}/>
     </List.Item>
   );
 

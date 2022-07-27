@@ -4,6 +4,8 @@ import ConfigList from "./components/ConfigList/ConfigList";
 import { Button } from "antd";
 import ConfigForm from "./components/ConfigForm/ConfigForm";
 
+//TODO: add popup for messages
+//TODO: use constants for hardcoded strings
 const App = () => {
   const [operation, setOperation] = useState("");
   const [isConfigFormVisible, setIsConfigFormVisible] = useState(false);

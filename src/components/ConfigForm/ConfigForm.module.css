@@ -2,7 +2,7 @@
   background: white;
   display: flex;
   border-radius: 10px;
-  width: 50em;
+  width: 53em;
   height: 55em;
   color: black;
   align-self: center;
@@ -21,22 +21,25 @@
   position: relative;
 }
 
-.typeSelect{
+.typeSelect {
   position: absolute !important;
   right: 27px;
 }
-.saveButton{
+
+.saveButton {
   width: 10em;
   margin-top: 2em;
   align-self: center;
 }
-.configForm{
+
+.configForm {
   margin-top: 2em !important;
 }
-ul{
+
+ul {
   list-style-type: none;
 }
 
-li{
+li {
   margin-bottom: 1em;
 }

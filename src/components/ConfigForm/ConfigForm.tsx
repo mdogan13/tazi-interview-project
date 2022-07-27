@@ -98,20 +98,22 @@ const ConfigForm = (props: any) => {
   };
 
   const generateFormItem = (formItemConfig: any) => {
+    let itemType = formItemConfig['type'];
+
     if (formItemConfig['options']) {
       return generateDropdown(formItemConfig['options'])
-    } else if (formItemConfig['resolution']) {
+    } else if (itemType === 'integer' || itemType === 'double') {
       return generateIncrementalInput(formItemConfig)
-    } else if (formItemConfig['type'] === 'boolean') {
+    } else if (itemType === 'boolean') {
       return (
         <Radio.Group value={formItemConfig.default}>
-          <Radio value={true}>True</Radio>
-          <Radio value={false}>False</Radio>
+          <Radio value={'true'}>True</Radio>
+          <Radio value={'false'}>False</Radio>
         </Radio.Group>
       );
     }
 
-    return <Input />;
+    return <Input />
   };
 
   const generateDropdown = (options: []) => (
@@ -121,7 +123,13 @@ const ConfigForm = (props: any) => {
   );
 
   const generateIncrementalInput = (config: any) => (
-    <InputNumber min={config.min} max={config.max} step={config.resolution} value={config.default} />
+    <InputNumber
+      style={{ width: 100 + '%' }}
+      min={config.min}
+      max={config.max}
+      step={config.resolution ?? 0.1}
+      value={config.default}
+      precision={config.type === 'integer' ? 0 : undefined} />
   );
 
   const isObject = (x: any) => {
